@@ -32,37 +32,17 @@
             transition: transform 0.1s ease-out;
             border-radius: 16px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            background: #1a1a1a;
         }
 
-        #card-background {
+        #hologram-canvas {
             position: absolute;
             width: 100%;
             height: 100%;
-            background: #2a2a2a;
+            top: 0;
+            left: 0;
             border-radius: 16px;
-            overflow: hidden;
-        }
-
-        #hologram-gradient {
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            top: -50%;
-            left: -50%;
-            background-image: linear-gradient(
-                45deg,
-                #ff0080 0%,
-                #ff8c00 14%,
-                #ffd700 28%,
-                #00ff00 42%,
-                #00ffff 56%,
-                #0080ff 70%,
-                #8000ff 84%,
-                #ff0080 100%
-            );
-            opacity: 1;
-            transition: transform 0.1s ease-out;
-            pointer-events: none;
         }
 
         #card-content {
@@ -150,21 +130,7 @@
             margin-top: 10px;
         }
 
-        .shimmer {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                105deg,
-                transparent 40%,
-                rgba(255, 255, 255, 0.2) 50%,
-                transparent 60%
-            );
-            animation: shimmer 3s infinite;
-            border-radius: 16px;
-            pointer-events: none;
-            z-index: 5;
-        }
+
 
         @keyframes shimmer {
             0% { transform: translateX(-100%); }
@@ -184,10 +150,7 @@
 <body>
     <div id="container">
         <div id="card">
-            <div id="card-background">
-                <div id="hologram-gradient"></div>
-                <div class="shimmer"></div>
-            </div>
+            <canvas id="hologram-canvas" width="640" height="400"></canvas>
             <div id="card-content">
                 <div id="card-logo"></div>
                 <div>
@@ -215,10 +178,15 @@
 
         // DOM要素の取得
         const card = document.getElementById('card');
-        const hologramGradient = document.getElementById('hologram-gradient');
+        const canvas = document.getElementById('hologram-canvas');
+        const ctx = canvas.getContext('2d');
         const dataDisplay = document.getElementById('data');
         const requestPermissionBtn = document.getElementById('requestPermissionBtn');
         const cardLogo = document.getElementById('card-logo');
+
+        // キャンバスのサイズ設定
+        canvas.width = 640;
+        canvas.height = 400;
 
         // エネルギー効率の設定
         const UPDATE_INTERVAL = 1000 / 60; // 60fps
@@ -245,12 +213,31 @@
             if (!isGyroActive || LOW_POWER_MODE) return;
 
             const hue = calculateHue(alpha, beta, gamma);
-            const rotateAngle = hue;
             
-            // グラデーションの回転と位置調整
-            const translateX = Math.sin(rotateAngle * Math.PI / 180) * 50;
-            const translateY = Math.cos(rotateAngle * Math.PI / 180) * 50;
-            hologramGradient.style.transform = `translate(${translateX}%, ${translateY}%) rotate(${rotateAngle}deg)`;
+            // キャンバスでグラデーションを描画
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 虹色のグラデーションを作成
+            const centerX = canvas.width / 2 + Math.sin(hue * Math.PI / 180) * 100;
+            const centerY = canvas.height / 2 + Math.cos(hue * Math.PI / 180) * 100;
+            
+            const gradient = ctx.createRadialGradient(
+                centerX, centerY, 0,
+                centerX, centerY, 400
+            );
+            
+            // 虹色のストップを追加
+            gradient.addColorStop(0, `hsla(${hue}, 100%, 50%, 0.8)`);
+            gradient.addColorStop(0.16, `hsla(${(hue + 60) % 360}, 100%, 50%, 0.8)`);
+            gradient.addColorStop(0.33, `hsla(${(hue + 120) % 360}, 100%, 50%, 0.8)`);
+            gradient.addColorStop(0.5, `hsla(${(hue + 180) % 360}, 100%, 50%, 0.8)`);
+            gradient.addColorStop(0.66, `hsla(${(hue + 240) % 360}, 100%, 50%, 0.8)`);
+            gradient.addColorStop(0.83, `hsla(${(hue + 300) % 360}, 100%, 50%, 0.8)`);
+            gradient.addColorStop(1, `hsla(${hue}, 100%, 50%, 0)`);
+            
+            // グラデーションで塗りつぶし
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             // カードの3D回転（控えめに）
             const tiltX = beta * 0.1;
@@ -262,17 +249,6 @@
             cardLogo.style.background = `linear-gradient(45deg, 
                 hsl(${logoHue}, 100%, 70%), 
                 hsl(${(logoHue + 60) % 360}, 100%, 70%))`;
-            
-            // デバッグ用：背景色も変更してみる
-            hologramGradient.style.background = `linear-gradient(${rotateAngle}deg,
-                #ff0080 0%,
-                #ff8c00 14%,
-                #ffd700 28%,
-                #00ff00 42%,
-                #00ffff 56%,
-                #0080ff 70%,
-                #8000ff 84%,
-                #ff0080 100%)`;
         }
 
         // データ表示の更新
