@@ -38,7 +38,7 @@
             position: absolute;
             width: 100%;
             height: 100%;
-            background: #1a1a1a;
+            background: #2a2a2a;
             border-radius: 16px;
             overflow: hidden;
         }
@@ -49,18 +49,18 @@
             height: 200%;
             top: -50%;
             left: -50%;
-            background: conic-gradient(
-                from 0deg,
-                #ff0080,
-                #ff8c00,
-                #ffd700,
-                #00ff00,
-                #00ffff,
-                #0080ff,
-                #8000ff,
-                #ff0080
+            background-image: linear-gradient(
+                45deg,
+                #ff0080 0%,
+                #ff8c00 14%,
+                #ffd700 28%,
+                #00ff00 42%,
+                #00ffff 56%,
+                #0080ff 70%,
+                #8000ff 84%,
+                #ff0080 100%
             );
-            opacity: 0.7;
+            opacity: 1;
             transition: transform 0.1s ease-out;
             pointer-events: none;
         }
@@ -247,8 +247,10 @@
             const hue = calculateHue(alpha, beta, gamma);
             const rotateAngle = hue;
             
-            // グラデーションの回転
-            hologramGradient.style.transform = `rotate(${rotateAngle}deg)`;
+            // グラデーションの回転と位置調整
+            const translateX = Math.sin(rotateAngle * Math.PI / 180) * 50;
+            const translateY = Math.cos(rotateAngle * Math.PI / 180) * 50;
+            hologramGradient.style.transform = `translate(${translateX}%, ${translateY}%) rotate(${rotateAngle}deg)`;
             
             // カードの3D回転（控えめに）
             const tiltX = beta * 0.1;
@@ -261,8 +263,16 @@
                 hsl(${logoHue}, 100%, 70%), 
                 hsl(${(logoHue + 60) % 360}, 100%, 70%))`;
             
-            // グラデーションの明度も調整
-            hologramGradient.style.opacity = 0.6 + Math.sin(hue * Math.PI / 180) * 0.2;
+            // デバッグ用：背景色も変更してみる
+            hologramGradient.style.background = `linear-gradient(${rotateAngle}deg,
+                #ff0080 0%,
+                #ff8c00 14%,
+                #ffd700 28%,
+                #00ff00 42%,
+                #00ffff 56%,
+                #0080ff 70%,
+                #8000ff 84%,
+                #ff0080 100%)`;
         }
 
         // データ表示の更新
