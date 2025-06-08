@@ -1,367 +1,385 @@
 <!DOCTYPE html>
 <html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ホログラムカードデモ</title>
     <style>
-      body {
-        margin: 0;
-        padding: 0;
-        background: #0a0a0a;
-        color: white;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh;
-        overflow: hidden;
-      }
-
-      #container {
-        perspective: 1000px;
-        margin: 20px;
-      }
-
-      #card {
-        width: 320px;
-        height: 200px;
-        position: relative;
-        transform-style: preserve-3d;
-        transition: transform 0.1s ease-out;
-        border-radius: 16px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-      }
-
-      #card-background {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        background: #1a1a1a;
-        border-radius: 16px;
-        overflow: hidden;
-      }
-
-      #hologram-gradient {
-        position: absolute;
-        width: 200%;
-        height: 200%;
-        top: -50%;
-        left: -50%;
-        background: conic-gradient(from 0deg, #ff0080, #ff8c00, #ffd700, #00ff00, #00ffff, #0080ff, #8000ff, #ff0080);
-        opacity: 0.8;
-        mix-blend-mode: screen;
-        transition: transform 0.1s ease-out;
-      }
-
-      #card-content {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        padding: 20px;
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        z-index: 10;
-      }
-
-      #card-logo {
-        width: 60px;
-        height: 60px;
-        background: white;
-        mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="30" fill="white"/><circle cx="50" cy="50" r="20" fill="black"/></svg>');
-        mask-size: cover;
-        -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="30" fill="white"/><circle cx="50" cy="50" r="20" fill="black"/></svg>');
-        -webkit-mask-size: cover;
-      }
-
-      #card-number {
-        font-size: 18px;
-        letter-spacing: 2px;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-      }
-
-      #card-name {
-        font-size: 14px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-      }
-
-      #info {
-        text-align: center;
-        margin: 20px;
-        padding: 20px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        backdrop-filter: blur(10px);
-        max-width: 400px;
-      }
-
-      #requestPermissionBtn {
-        display: none;
-        padding: 12px 24px;
-        font-size: 16px;
-        background: linear-gradient(45deg, #ff0080, #0080ff);
-        color: white;
-        border: none;
-        border-radius: 24px;
-        cursor: pointer;
-        margin: 20px;
-        transition: transform 0.2s;
-      }
-
-      #requestPermissionBtn:hover {
-        transform: scale(1.05);
-      }
-
-      #requestPermissionBtn:active {
-        transform: scale(0.95);
-      }
-
-      #data {
-        font-family: monospace;
-        font-size: 12px;
-        color: #888;
-        margin-top: 10px;
-      }
-
-      .shimmer {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.3) 50%, transparent 60%);
-        animation: shimmer 3s infinite;
-        border-radius: 16px;
-        pointer-events: none;
-      }
-
-      @keyframes shimmer {
-        0% {
-          transform: translateX(-100%);
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0a0a0a;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
         }
-        100% {
-          transform: translateX(100%);
+
+        #container {
+            perspective: 1000px;
+            margin: 20px;
         }
-      }
 
-      /* 低電力モード時のスタイル */
-      .low-power #hologram-gradient {
-        display: none;
-      }
+        #card {
+            width: 320px;
+            height: 200px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
 
-      .low-power #card-logo {
-        background: linear-gradient(45deg, #666, #999);
-      }
+        #card-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #1a1a1a;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        #hologram-gradient {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background: conic-gradient(
+                from 0deg,
+                #ff0080,
+                #ff8c00,
+                #ffd700,
+                #00ff00,
+                #00ffff,
+                #0080ff,
+                #8000ff,
+                #ff0080
+            );
+            opacity: 0.7;
+            transition: transform 0.1s ease-out;
+            pointer-events: none;
+        }
+
+        #card-content {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        #card-logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #fff, #ccc);
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #card-logo::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: #1a1a1a;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #card-number {
+            font-size: 18px;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        #card-name {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        #info {
+            text-align: center;
+            margin: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            max-width: 400px;
+        }
+
+        #requestPermissionBtn {
+            display: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            background: linear-gradient(45deg, #ff0080, #0080ff);
+            color: white;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            margin: 20px;
+            transition: transform 0.2s;
+        }
+
+        #requestPermissionBtn:hover {
+            transform: scale(1.05);
+        }
+
+        #requestPermissionBtn:active {
+            transform: scale(0.95);
+        }
+
+        #data {
+            font-family: monospace;
+            font-size: 12px;
+            color: #888;
+            margin-top: 10px;
+        }
+
+        .shimmer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                105deg,
+                transparent 40%,
+                rgba(255, 255, 255, 0.2) 50%,
+                transparent 60%
+            );
+            animation: shimmer 3s infinite;
+            border-radius: 16px;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* 低電力モード時のスタイル */
+        .low-power #hologram-gradient {
+            display: none;
+        }
+
+        .low-power #card-logo {
+            background: linear-gradient(45deg, #666, #999);
+        }
     </style>
-  </head>
-  <body>
+</head>
+<body>
     <div id="container">
-      <div id="card">
-        <div id="card-background">
-          <div id="hologram-gradient"></div>
-          <div class="shimmer"></div>
+        <div id="card">
+            <div id="card-background">
+                <div id="hologram-gradient"></div>
+                <div class="shimmer"></div>
+            </div>
+            <div id="card-content">
+                <div id="card-logo"></div>
+                <div>
+                    <div id="card-number">1234 5678 9012 3456</div>
+                    <div id="card-name">HOLOGRAM CARD</div>
+                </div>
+            </div>
         </div>
-        <div id="card-content">
-          <div id="card-logo"></div>
-          <div>
-            <div id="card-number">1234 5678 9012 3456</div>
-            <div id="card-name">HOLOGRAM CARD</div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <button id="requestPermissionBtn">ジャイロセンサーを有効にする</button>
 
     <div id="info">
-      <h3>ホログラムカードデモ</h3>
-      <p>デバイスを傾けるとカードが虹色に光ります</p>
-      <div id="data"></div>
+        <h3>ホログラムカードデモ</h3>
+        <p>デバイスを傾けるとカードが虹色に光ります</p>
+        <div id="data"></div>
     </div>
 
     <script>
-      // 変数の初期化
-      let alpha = 0,
-        beta = 0,
-        gamma = 0;
-      let isGyroActive = false;
-      let animationFrame = null;
-      let updateInterval = null;
+        // 変数の初期化
+        let alpha = 0, beta = 0, gamma = 0;
+        let isGyroActive = false;
+        let animationFrame = null;
+        let updateInterval = null;
 
-      // DOM要素の取得
-      const card = document.getElementById('card');
-      const hologramGradient = document.getElementById('hologram-gradient');
-      const dataDisplay = document.getElementById('data');
-      const requestPermissionBtn = document.getElementById('requestPermissionBtn');
-      const cardLogo = document.getElementById('card-logo');
+        // DOM要素の取得
+        const card = document.getElementById('card');
+        const hologramGradient = document.getElementById('hologram-gradient');
+        const dataDisplay = document.getElementById('data');
+        const requestPermissionBtn = document.getElementById('requestPermissionBtn');
+        const cardLogo = document.getElementById('card-logo');
 
-      // エネルギー効率の設定
-      const UPDATE_INTERVAL = 1000 / 60; // 60fps
-      const LOW_POWER_MODE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        // エネルギー効率の設定
+        const UPDATE_INTERVAL = 1000 / 60; // 60fps
+        const LOW_POWER_MODE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      // 低電力モード対応
-      if (LOW_POWER_MODE) {
-        document.body.classList.add('low-power');
-      }
+        // 低電力モード対応
+        if (LOW_POWER_MODE) {
+            document.body.classList.add('low-power');
+        }
 
-      // HSB色相への変換
-      function calculateHue(alpha, beta, gamma) {
-        // 3軸の値を0-360度の色相に変換
-        const normalizedAlpha = ((alpha + 180) / 360) * 120;
-        const normalizedBeta = ((beta + 90) / 180) * 120;
-        const normalizedGamma = ((gamma + 90) / 180) * 120;
+        // HSB色相への変換
+        function calculateHue(alpha, beta, gamma) {
+            // 3軸の値を0-360度の色相に変換
+            const normalizedAlpha = ((alpha + 180) / 360) * 120;
+            const normalizedBeta = ((beta + 90) / 180) * 120;
+            const normalizedGamma = ((gamma + 90) / 180) * 120;
+            
+            const hue = (normalizedAlpha + normalizedBeta + normalizedGamma) % 360;
+            return hue;
+        }
 
-        const hue = (normalizedAlpha + normalizedBeta + normalizedGamma) % 360;
-        return hue;
-      }
+        // グラデーションの更新
+        function updateHologram() {
+            if (!isGyroActive || LOW_POWER_MODE) return;
 
-      // グラデーションの更新
-      function updateHologram() {
-        if (!isGyroActive || LOW_POWER_MODE) return;
+            const hue = calculateHue(alpha, beta, gamma);
+            const rotateAngle = hue;
+            
+            // グラデーションの回転
+            hologramGradient.style.transform = `rotate(${rotateAngle}deg)`;
+            
+            // カードの3D回転（控えめに）
+            const tiltX = beta * 0.1;
+            const tiltY = gamma * 0.1;
+            card.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+            
+            // ロゴの色相変更
+            const logoHue = (hue + 180) % 360;
+            cardLogo.style.background = `linear-gradient(45deg, 
+                hsl(${logoHue}, 100%, 70%), 
+                hsl(${(logoHue + 60) % 360}, 100%, 70%))`;
+            
+            // グラデーションの明度も調整
+            hologramGradient.style.opacity = 0.6 + Math.sin(hue * Math.PI / 180) * 0.2;
+        }
 
-        const hue = calculateHue(alpha, beta, gamma);
-        const rotateAngle = hue;
-
-        // グラデーションの回転
-        hologramGradient.style.transform = `rotate(${rotateAngle}deg)`;
-
-        // カードの3D回転（控えめに）
-        const tiltX = beta * 0.1;
-        const tiltY = gamma * 0.1;
-        card.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
-
-        // ロゴの色相変更
-        const logoHue = (hue + 180) % 360;
-        cardLogo.style.filter = `hue-rotate(${logoHue}deg) brightness(1.5)`;
-      }
-
-      // データ表示の更新
-      function updateDataDisplay() {
-        if (dataDisplay) {
-          dataDisplay.innerHTML = `
+        // データ表示の更新
+        function updateDataDisplay() {
+            if (dataDisplay) {
+                dataDisplay.innerHTML = `
                     α: ${alpha.toFixed(1)}° | 
                     β: ${beta.toFixed(1)}° | 
                     γ: ${gamma.toFixed(1)}°
                 `;
+            }
         }
-      }
 
-      // ジャイロセンサーの開始
-      function startGyro() {
-        if (window.DeviceOrientationEvent) {
-          window.addEventListener('deviceorientation', handleOrientation);
-          isGyroActive = true;
-          requestPermissionBtn.style.display = 'none';
-
-          // 更新ループの開始
-          updateInterval = setInterval(() => {
-            updateHologram();
-            updateDataDisplay();
-          }, UPDATE_INTERVAL);
+        // ジャイロセンサーの開始
+        function startGyro() {
+            if (window.DeviceOrientationEvent) {
+                window.addEventListener('deviceorientation', handleOrientation);
+                isGyroActive = true;
+                requestPermissionBtn.style.display = 'none';
+                
+                // 更新ループの開始
+                updateInterval = setInterval(() => {
+                    updateHologram();
+                    updateDataDisplay();
+                }, UPDATE_INTERVAL);
+            }
         }
-      }
 
-      // ジャイロセンサーの停止
-      function stopGyro() {
-        window.removeEventListener('deviceorientation', handleOrientation);
-        isGyroActive = false;
-
-        if (updateInterval) {
-          clearInterval(updateInterval);
-          updateInterval = null;
+        // ジャイロセンサーの停止
+        function stopGyro() {
+            window.removeEventListener('deviceorientation', handleOrientation);
+            isGyroActive = false;
+            
+            if (updateInterval) {
+                clearInterval(updateInterval);
+                updateInterval = null;
+            }
         }
-      }
 
-      // デバイスの向きハンドラー
-      function handleOrientation(event) {
-        alpha = event.alpha || 0;
-        beta = event.beta || 0;
-        gamma = event.gamma || 0;
-      }
+        // デバイスの向きハンドラー
+        function handleOrientation(event) {
+            alpha = event.alpha || 0;
+            beta = event.beta || 0;
+            gamma = event.gamma || 0;
+        }
 
-      // iOS13以降の許可リクエスト
-      function requestGyroPermission() {
-        // DeviceMotionEventの許可をリクエスト（最初のコードと同じ方法）
-        if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-          DeviceMotionEvent.requestPermission()
-            .then((response) => {
-              if (response === 'granted') {
-                // DeviceOrientationEventも許可をリクエスト
-                if (
-                  typeof DeviceOrientationEvent !== 'undefined' &&
-                  typeof DeviceOrientationEvent.requestPermission === 'function'
-                ) {
-                  DeviceOrientationEvent.requestPermission()
-                    .then((response) => {
-                      if (response === 'granted') {
-                        startGyro();
-                      } else {
-                        alert('ジャイロセンサーへのアクセスが拒否されました');
-                      }
+        // iOS13以降の許可リクエスト
+        function requestGyroPermission() {
+            // DeviceMotionEventの許可をリクエスト（最初のコードと同じ方法）
+            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                DeviceMotionEvent.requestPermission()
+                    .then(response => {
+                        if (response === 'granted') {
+                            // DeviceOrientationEventも許可をリクエスト
+                            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                                DeviceOrientationEvent.requestPermission()
+                                    .then(response => {
+                                        if (response === 'granted') {
+                                            startGyro();
+                                        } else {
+                                            alert('ジャイロセンサーへのアクセスが拒否されました');
+                                        }
+                                    })
+                                    .catch(console.error);
+                            } else {
+                                startGyro();
+                            }
+                        } else {
+                            alert('モーションセンサーへのアクセスが拒否されました');
+                        }
                     })
                     .catch(console.error);
-                } else {
-                  startGyro();
-                }
-              } else {
-                alert('モーションセンサーへのアクセスが拒否されました');
-              }
-            })
-            .catch(console.error);
-        } else if (
-          typeof DeviceOrientationEvent !== 'undefined' &&
-          typeof DeviceOrientationEvent.requestPermission === 'function'
-        ) {
-          // DeviceOrientationEventのみの場合
-          DeviceOrientationEvent.requestPermission()
-            .then((response) => {
-              if (response === 'granted') {
+            } else if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                // DeviceOrientationEventのみの場合
+                DeviceOrientationEvent.requestPermission()
+                    .then(response => {
+                        if (response === 'granted') {
+                            startGyro();
+                        } else {
+                            alert('ジャイロセンサーへのアクセスが拒否されました');
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                // Androidや古いiOSの場合
                 startGyro();
-              } else {
-                alert('ジャイロセンサーへのアクセスが拒否されました');
-              }
-            })
-            .catch(console.error);
-        } else {
-          // Androidや古いiOSの場合
-          startGyro();
+            }
         }
-      }
 
-      // 初期化
-      function init() {
-        // iOS13以降の場合はボタンを表示
-        if (
-          (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') ||
-          (typeof DeviceOrientationEvent !== 'undefined' &&
-            typeof DeviceOrientationEvent.requestPermission === 'function')
-        ) {
-          requestPermissionBtn.style.display = 'block';
-        } else if (window.DeviceOrientationEvent) {
-          // その他のデバイスは自動で開始
-          startGyro();
-        } else {
-          dataDisplay.textContent = 'ジャイロセンサーがサポートされていません';
+        // 初期化
+        function init() {
+            // iOS13以降の場合はボタンを表示
+            if ((typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') ||
+                (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function')) {
+                requestPermissionBtn.style.display = 'block';
+            } else if (window.DeviceOrientationEvent) {
+                // その他のデバイスは自動で開始
+                startGyro();
+            } else {
+                dataDisplay.textContent = 'ジャイロセンサーがサポートされていません';
+            }
         }
-      }
 
-      // イベントリスナー
-      requestPermissionBtn.addEventListener('click', requestGyroPermission);
+        // イベントリスナー
+        requestPermissionBtn.addEventListener('click', requestGyroPermission);
 
-      // ページ表示/非表示の管理
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-          stopGyro();
-        } else if (isGyroActive) {
-          startGyro();
-        }
-      });
+        // ページ表示/非表示の管理
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                stopGyro();
+            } else if (isGyroActive) {
+                startGyro();
+            }
+        });
 
-      // 初期化実行
-      init();
+        // 初期化実行
+        init();
     </script>
-  </body>
+</body>
 </html>
